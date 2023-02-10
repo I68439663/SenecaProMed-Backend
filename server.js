@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const clientControllers = require("./controllers/client-controller.js");
 const adminControllers = require("./controllers/admin-controller.js");
@@ -9,6 +10,7 @@ const productControllers = require("./controllers/product-controller.js");
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
+app.use(cors());
 mongoose.set("strictQuery", false);
 
 //Home
