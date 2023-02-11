@@ -6,8 +6,9 @@ const router = express.Router();
 
 const pharmaService = require("../services/pharma-service");
 const validation = require("../middleware/validation.js")
+
 // POST routes
-router.post("/signup", pharmaService.createPharmacy);
+router.post("/signup", validation.CreateUser, pharmaService.createPharmacy);
 
 // GET routes
 router.get("/All_Pharmacies", pharmaService.getAllPharmacyUsers);
