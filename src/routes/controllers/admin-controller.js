@@ -3,6 +3,8 @@
 const express = require('express');
 const router = express.Router();
 
+const { createUser } = require('../middleware/validator');
+
 const adminService = require('../services/admin-service.js');
 const clientService = require('../services/client-service.js');
 const driverService = require('../services/driver-service.js');
@@ -16,10 +18,13 @@ const pharmaService = require('../services/pharma-service.js');
 /**
  * @name Admin
  * @description Admin endpoints
- * @summary GET, POST
+ * @summary GET, GET(ALL) POST, PUT
  */
 router.get('/:id', adminService.getAdminById);
-router.post('/signup', adminService.createAdmin);
+router.get('/all/admins', adminService.getAllAdmins);
+router.post('/signup', createUser, adminService.createAdmin);
+router.put('/:id', adminService.UpdateAdminById);
+router.delete('/:id',adminService.deleteAdmin);
 
 /**
  * @name Admin/Client
@@ -28,7 +33,7 @@ router.post('/signup', adminService.createAdmin);
  */
 router.get('/clients/all_clients', clientService.getAllClients);
 router.get('/client/:id', clientService.getClientById);
-router.post('/client/signup', clientService.createClient);
+router.post('/client/signup', createUser, clientService.createClient);
 
 /**
  * @name Admin/Driver
@@ -37,7 +42,7 @@ router.post('/client/signup', clientService.createClient);
  */
 router.get('/drivers/all_drivers', driverService.getAllDrivers);
 router.get('/driver/:id', driverService.getDriverById);
-router.post('/driver/signup', driverService.createDriver);
+router.post('/driver/signup', createUser, driverService.createDriver);
 router.put('/driver/:id', driverService.updateDriver);
 
 /**
