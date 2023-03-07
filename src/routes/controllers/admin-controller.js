@@ -23,6 +23,7 @@ const pharmaService = require('../services/pharma-service.js');
 router.get('/:id', adminService.getAdminById);
 router.get('/all/admins', adminService.getAllAdmins);
 router.post('/signup', createUser, adminService.createAdmin);
+router.post('/login', adminService.adminLogin);
 router.put('/:id', adminService.UpdateAdminById);
 router.delete('/:id',adminService.deleteAdmin);
 
@@ -34,6 +35,7 @@ router.delete('/:id',adminService.deleteAdmin);
 router.get('/clients/all_clients', clientService.getAllClients);
 router.get('/client/:id', clientService.getClientById);
 router.post('/client/signup', createUser, clientService.createClient);
+router.put('/client/:id', clientService.updateClientById); 
 
 /**
  * @name Admin/Driver
