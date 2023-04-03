@@ -16,10 +16,6 @@ app.use(cors());
 // middleware to parse incoming JSON requests and add them in req.body
 app.use(express.json());
 
-if (!process.env.SECRET_KEY) {
-  throw new Error('SECRET_KEY must be defined');
-}
-
 // ROUTES: all routes will be define under './routes'
 app.use('/', require('./routes/router'));
 
