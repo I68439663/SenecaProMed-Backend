@@ -14,21 +14,13 @@ module.exports.getAdminById = (req, res) => {
   // Use the findById method to find an admin user with the specified ID.
   // Use a projection to include only the desired fields in the result.
   adminModel
-    .findById(
-      req.params.id,
-      'role userName firstName lastName email postalCode street city province country'
-    )
+    .findById(req.params.id)
     .then((user) => {
       // If an admin user is found, return a JSON response with the user data.
       if (user) {
         res.json({
           message: `admin with the id: ${req.params.id}`,
-          data: {
-            userName: user.userName,
-            name: `${user.firstName} ${user.lastName}`,
-            contact: `${user.email} ${user.phoneNumber}`,
-            address: `${user.postalCode} ${user.street} ${user.province} ${user.country}`,
-          },
+          data: user,
         });
         // If no admin user is found, return a 404 error.
       } else {
@@ -53,32 +45,15 @@ module.exports.getAdminById = (req, res) => {
     });
 };
 
-module.exports.getAllAdmins = async (req, res) => {
-  try {
-    const userData = await adminModel.find();
-    if (userData.length > 0) {
-      const usersData = userData.map((user) => {
-        return {
-          userName: user.userName,
-          name: `${user.firstName} ${user.lastName}`,
-          contact: `${user.email} ${user.phoneNumber}`,
-          address: `${user.postalCode} ${user.street} ${user.province} ${user.country}`,
-        };
-      });
-      res.status(200).json({
-        message: ['All admin users', usersData.length],
-        data: usersData,
-      });
-    } else {
-      res.status(404).json({
-        message: 'No admin users found',
+module.exports.getAllAdmins = (req, res) => {
+  adminModel.find().then((user) => {
+    if (user.length > 0) {
+      res.json({
+        message: ['All Admin users', user.length],
+        data: user,
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      message: `Error finding admin users: ${error}`,
-    });
-  }
+  });
 };
 
 module.exports.createAdmin = async (req, res) => {
@@ -88,7 +63,8 @@ module.exports.createAdmin = async (req, res) => {
     let salt = bcrypt.genSaltSync(10);
     let hash = bcrypt.hashSync(req.body.password, salt);
     req.body.password = hash;
-    req.body.userName = req.body.email;
+    req.body.email = req.body.email.toLowerCase();
+    req.body.userName = req.body.email.toLowerCase();
 
     const existingAdmin = await adminModel.findOne({ email: req.body.email });
     if (existingAdmin) {
@@ -119,16 +95,12 @@ module.exports.UpdateAdminById = (req, res) => {
     .then((user) => {
       if (user) {
         res.json({
-          message: `Admin with ID (${req.params.id}) has been updated successfully`,
-          Username: user.userName,
-          Name: `${user.firstName} ${user.lastName}`,
-          Contact_info: `${user.email} ${user.phoneNumber}`,
-          Address: `${user.postalCode} ${user.street} ${user.province} ${user.country}`,
-          Updated_at: now,
+          message: `user with ID (${req.params.id}) has been updated successfully`,
+          data: user,
         });
       } else {
         res.status(404).json({
-          message: `Admin with ID (${req.params.id}) is NOT found`,
+          message: `user with ID (${req.params.id}) is NOT found`,
         });
       }
     })
@@ -141,7 +113,7 @@ module.exports.UpdateAdminById = (req, res) => {
 
 // DELETE Route - Deleting clients by ID
 module.exports.deleteAdmin = (req, res) => {
-  clientModel
+  adminModel
     .findByIdAndRemove(req.params.id)
     .then(() => {
       res.json({
@@ -162,7 +134,7 @@ module.exports.adminLogin = async (req, res) => {
   const adminUser = await adminModel.findOne({ userName: username, role: role });
 
   if (!adminUser) {
-    return res.status(401).json({ message: 'invalid username or password' });
+    return res.status(401).json({ message: 'invalid username' });
   } else {
     console.log('username is valid');
   }
@@ -170,18 +142,23 @@ module.exports.adminLogin = async (req, res) => {
   const isPasswordValid = await bcrypt.compare(password, adminUser.password);
 
   if (!isPasswordValid) {
-    return res.status(401).json({ message: 'invalid username or password' });
+    return res.status(401).json({ message: 'invalid password' });
   } else {
     console.log('password matches');
   }
 
   // create token
   const expiryDate = { expiresIn: '6 h' };
-  const token = jwt.sign(
-    { userName: adminUser.userName, role: adminUser.role },
-    process.env.SECRET_KEY,
-    expiryDate
-  );
+
+  // Create a new userData object that excludes password, and replace _id with id
+  const userData = { ...adminUser._doc };
+  userData.id = adminUser.id;
+
+  delete userData._id;
+  delete userData.password;
+
+  // Generate the JWT token using the userData object
+  const token = jwt.sign(userData, process.env.SECRET_KEY, expiryDate);
 
   res.status(200).json(token);
 };
