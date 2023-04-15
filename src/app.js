@@ -10,8 +10,24 @@ const { newSuccessResponse, newFailedResponse } = require('./response');
 // creates express app instance
 const app = express();
 
+const allowlist = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://silver-sundae-d1d08d.netlify.app',
+];
+
+const corsOptionsDelegate = function (req, callback) {
+  var corsOptions;
+  if (allowlist.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
+  } else {
+    corsOptions = { origin: false }; // disable CORS for this request
+  }
+  callback(null, corsOptions); // callback expects two parameters: error and options
+};
+
 // using cors() middleware to make post requests across origins
-app.use(cors());
+app.use(cors(corsOptionsDelegate));
 
 // middleware to parse incoming JSON requests and add them in req.body
 app.use(express.json());
