@@ -28,6 +28,8 @@ const corsOptionsDelegate = function (req, callback) {
   callback(null, corsOptions); // callback expects two parameters: error and options
 };
 
+app.use(cors(corsOptionsDelegate));
+
 // get port number
 const port = parseInt(process.env.PORT || 8080, 10);
 
