@@ -6,6 +6,9 @@ const stoppable = require('stoppable');
 // Read environment variables from an .env file (if present)
 require('dotenv').config();
 
+// express app instance
+const app = require('./app');
+
 // get port number
 const port = parseInt(process.env.PORT || 8080, 10);
 
